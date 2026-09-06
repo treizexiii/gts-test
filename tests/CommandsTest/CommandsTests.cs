@@ -105,19 +105,19 @@ public class CommandsTests
         var hole = new Hole { Id = Guid.NewGuid(), Status = status };
         await fixture.Holes.AddAsync(hole);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<InvalidHoleStatusException>(() =>
             fixture.Commands.ChargeHoleCommand(Guid.NewGuid(), hole.Id)
         );
     }
 
     [Fact]
-    public async Task FireBlastCommand_WhenHoleIsNotChargedOrReady_ThrowsInvalidOperationException()
+    public async Task FireBlastCommand_WhenHoleIsNotChargedOrReady_ThrowsInvalidHoleStatusException()
     {
         var fixture = new CommandsFixture();
         var blastId = await fixture.CreateBlastAsync();
         await fixture.Commands.AddHole(blastId, CreateHoleDto());
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<InvalidHoleStatusException>(() =>
             fixture.Commands.FireBlastCommand(blastId)
         );
     }
@@ -157,7 +157,7 @@ public class CommandsTests
     }
 
     [Fact]
-    public async Task FireBlastCommand_WhenAlreadyBlasted_ThrowsInvalidOperationException()
+    public async Task FireBlastCommand_WhenAlreadyBlasted_ThrowsAlreadyBlastedException()
     {
         var fixture = new CommandsFixture();
         var blastId = await fixture.CreateBlastAsync();
@@ -165,7 +165,7 @@ public class CommandsTests
         blast!.Status = Status.Blasted;
         await fixture.Blasts.UpdateAsync(blast);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<AlreadyBlastedException>(() =>
             fixture.Commands.FireBlastCommand(blastId)
         );
     }

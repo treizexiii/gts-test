@@ -37,7 +37,7 @@ public class Commands : ICommands
         return newBlast.Id;
     }
 
-    public async Task AddHole(Guid blastId, AddHoleDto hole)
+    public async Task<Guid> AddHole(Guid blastId, AddHoleDto hole)
     {
         var blast = await _blastRepository.GetByIdAsync(blastId);
 
@@ -65,6 +65,7 @@ public class Commands : ICommands
         await _holesRepository.AddAsync(newHole);
 
         await _eventStore.RaiseEventAsync(EventType.HoleAdded, newHole.Id);
+        return newHole.Id;
     }
 
     public async Task ChargeHoleCommand(Guid blastId, Guid holeId)
@@ -77,9 +78,7 @@ public class Commands : ICommands
 
         if (hole.Status == Status.Charged || hole.Status == Status.Ready)
         {
-            throw new InvalidOperationException(
-                $"Hole with ID {holeId} cannot be charged because its status is {hole.Status}."
-            );
+            throw new InvalidHoleStatusException(holeId);
         }
 
         hole.Status = Status.Charged;
@@ -110,16 +109,12 @@ public class Commands : ICommands
             {
                 continue;
             }
-            throw new InvalidOperationException(
-                $"Cannot fire blast because hole with ID {hole.Id} is not ready or charged."
-            );
+            throw new InvalidHoleStatusException(hole.Id);
         }
 
         if (blast.Status == Status.Blasted)
         {
-            throw new InvalidOperationException(
-                $"Blast with ID {blastId} has already been fired."
-            );
+            throw new AlreadyBlastedException();
         }
 
         blast.Status = Status.Blasted;
@@ -128,4 +123,15 @@ public class Commands : ICommands
 
         await _eventStore.RaiseEventAsync(EventType.BlastFired, blast.Id);
     }
+}
+
+
+public class AlreadyBlastedException : Exception
+{
+    public AlreadyBlastedException() : base("Blast has already been fired.") { }
+}
+
+public class InvalidHoleStatusException : Exception
+{
+    public InvalidHoleStatusException(Guid holeId) : base($"Hole with ID {holeId} has an invalid status.") { }
 }
