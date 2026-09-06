@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/api/api.csproj" />
+    <Project Path="src/Commands/Commands.csproj" />
+    <Project Path="src/Core/Core.csproj" />
+    <Project Path="src/Query/Query.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CommandsTest/CommandsTest.csproj" />
+    <Project Path="tests/CoreTests/CoreTests.csproj" />
+    <Project Path="tests/QueryTests/QueryTests.csproj" />
+  </Folder>
+</Solution>
